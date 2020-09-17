@@ -274,7 +274,7 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
 
     });
 
-    this.knob.on('mouseup', (e) => {
+    this.knob.on('mouseup mouseleave', (e) => {
       if(this.newValue !== this.rpcValue) {
         this.rpcUpdateValue(this.newValue);
       }
