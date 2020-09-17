@@ -25,6 +25,7 @@ import { CanvasDigitalGauge, CanvasDigitalGaugeOptions } from '@home/components/
 import * as tinycolor_ from 'tinycolor2';
 import { ResizeObserver } from '@juggle/resize-observer';
 import GenericOptions = CanvasGauges.GenericOptions;
+import {number} from "prop-types";
 
 const tinycolor = tinycolor_;
 
@@ -67,6 +68,7 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
   title = '';
   minValue: number;
   maxValue: number;
+  newValue = 0;
 
   private startDeg = -1;
   private currentDeg = 0;
@@ -125,6 +127,7 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
     this.minmaxLabel = this.knobMinmaxContainer.find<HTMLElement>('.minmax-label');
     this.textMeasure = $(this.textMeasureRef.nativeElement);
     this.canvasBarElement = this.canvasBarElementRef.nativeElement;
+
 
     this.knobResize$ = new ResizeObserver(() => {
       this.resize();
@@ -200,6 +203,7 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
       this.turn(this.degreeToRatio(this.currentDeg));
       this.rotation = this.currentDeg;
       this.startDeg = -1;
+      this.rpcUpdateValue(this.newValue);
     });
 
     this.knob.on('mousedown touchstart', (e) => {
@@ -270,6 +274,12 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
 
     });
 
+    this.knob.on('mouseup', (e) => {
+      if(this.newValue !== this.rpcValue) {
+        this.rpcUpdateValue(this.newValue);
+      }
+    });
+
     const initialValue = isDefined(settings.initialValue) ? settings.initialValue : this.minValue;
     this.setValue(initialValue);
 
@@ -308,12 +318,12 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
   }
 
   private turn(ratio: number) {
-    const value = Number((this.minValue + (this.maxValue - this.minValue)*ratio).toFixed(this.ctx.decimals));
-    if (this.canvasBar.value !== value) {
-      this.canvasBar.value = value;
+    this.newValue = Number((this.minValue + (this.maxValue - this.minValue)*ratio).toFixed(this.ctx.decimals));
+    if (this.canvasBar.value !== this.newValue) {
+      this.canvasBar.value = this.newValue;
     }
     this.updateColor(this.canvasBar.getValueColor());
-    this.onValue(value);
+    this.onValue(this.newValue);
   }
 
   private resize() {
@@ -379,8 +389,10 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
   private onValue(value: number) {
     this.value = this.formatValue(value);
     this.checkValueSize();
-    this.rpcUpdateValue(value);
     this.ctx.detectChanges();
+    // this.knob.on('mouseup click', (ev) => {
+    //   this.rpcUpdateValue(value);
+    // });
   }
 
   private formatValue(value: any): string {
