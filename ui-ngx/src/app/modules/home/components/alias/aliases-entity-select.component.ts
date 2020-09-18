@@ -90,7 +90,6 @@ export class AliasesEntitySelectComponent implements OnInit, OnDestroy {
           }, 0);
         }
       ));
-      this.displayValue = "";
     }
   }
 
@@ -188,3 +187,4 @@ export class AliasesEntitySelectComponent implements OnInit, OnDestroy {
   }
 
 }
+
