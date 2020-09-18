@@ -26,6 +26,7 @@ import * as tinycolor_ from 'tinycolor2';
 import { ResizeObserver } from '@juggle/resize-observer';
 import GenericOptions = CanvasGauges.GenericOptions;
 import {number} from "prop-types";
+import {eventTargetLegacyPatch} from "zone.js/lib/browser/event-target-legacy";
 
 const tinycolor = tinycolor_;
 
@@ -169,44 +170,54 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
 
     this.canvasBar = new CanvasDigitalGauge(canvasBarData).draw();
 
+
+
     this.knob.on('click', (e) => {
-      if (this.moving) {
-        this.moving = false;
-        return false;
-      }
-      e.preventDefault();
-
-      const offset = this.knob.offset();
-      const center = {
-        y : offset.top + this.knob.height()/2,
-        x: offset.left + this.knob.width()/2
-      };
-      const rad2deg = 180/Math.PI;
-      const t: Touch = ((e.originalEvent as any).touches) ? (e.originalEvent as any).touches[0] : e;
-
-      const a = center.y - t.pageY;
-      const b = center.x - t.pageX;
-      let deg = Math.atan2(a,b)*rad2deg;
-      if(deg < 0){
-        deg = 360 + deg;
-      }
-      if (deg > this.maxDeg) {
-        if (deg - 360 > this.minDeg) {
-          deg = deg - 360;
-        } else {
+      if(this.newValue === this.rpcValue || this.rpcValue == undefined) {
+        if (this.moving) {
+          this.moving = false;
           return false;
         }
+        e.preventDefault();
+
+        const offset = this.knob.offset();
+        const center = {
+          y: offset.top + this.knob.height() / 2,
+          x: offset.left + this.knob.width() / 2
+        };
+        const rad2deg = 180 / Math.PI;
+        const t: Touch = ((e.originalEvent as any).touches) ? (e.originalEvent as any).touches[0] : e;
+        const a = center.y - t.pageY;
+        const b = center.x - t.pageX;
+        let deg = Math.atan2(a, b) * rad2deg;
+        if (deg < 0) {
+          deg = 360 + deg;
+        }
+        if (deg > this.maxDeg) {
+          if (deg - 360 > this.minDeg) {
+            deg = deg - 360;
+          } else {
+            return false;
+          }
+        }
+        this.currentDeg = deg;
+        this.lastDeg = deg;
+        this.knobTopPointerContainer.css('transform', 'rotate(' + (this.currentDeg) + 'deg)');
+        this.turn(this.degreeToRatio(this.currentDeg));
+        this.rotation = this.currentDeg;
+        this.startDeg = -1;
+        this.rpcUpdateValue(this.newValue);
       }
-      this.currentDeg = deg;
-      this.lastDeg = deg;
-      this.knobTopPointerContainer.css('transform','rotate('+(this.currentDeg)+'deg)');
-      this.turn(this.degreeToRatio(this.currentDeg));
-      this.rotation = this.currentDeg;
-      this.startDeg = -1;
-      this.rpcUpdateValue(this.newValue);
+    });
+
+    $(document).on('mouseup touchend', (e) => {
+      if(this.newValue !== this.rpcValue && this.moving) {
+        this.rpcUpdateValue(this.newValue);
+      }
     });
 
     this.knob.on('mousedown touchstart', (e) => {
+      this.moving  = false;
       e.preventDefault();
       const offset = this.knob.offset();
       const center = {
@@ -215,7 +226,7 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
       };
       const rad2deg = 180/Math.PI;
 
-      this.knob.on('mousemove.rem touchmove.rem', (ev) => {
+      $(document).on('mousemove.rem touchmove.rem', (ev) => {
         this.moving = true;
         const t: Touch = ((ev.originalEvent as any).touches) ? (ev.originalEvent as any).touches[0] : ev;
 
@@ -274,11 +285,6 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
 
     });
 
-    this.knob.on('mouseup mouseleave', (e) => {
-      if(this.newValue !== this.rpcValue) {
-        this.rpcUpdateValue(this.newValue);
-      }
-    });
 
     const initialValue = isDefined(settings.initialValue) ? settings.initialValue : this.minValue;
     this.setValue(initialValue);
@@ -308,6 +314,7 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
       }
     }
   }
+
 
   private degreeToRatio(degree: number): number {
     return (degree-this.minDeg)/(this.maxDeg-this.minDeg);
@@ -390,9 +397,6 @@ export class KnobComponent extends PageComponent implements OnInit, OnDestroy {
     this.value = this.formatValue(value);
     this.checkValueSize();
     this.ctx.detectChanges();
-    // this.knob.on('mouseup click', (ev) => {
-    //   this.rpcUpdateValue(value);
-    // });
   }
 
   private formatValue(value: any): string {
