@@ -117,7 +117,7 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
   dashboardWidget: DashboardWidget;
 
   @ViewChild('widgetContent', {read: ViewContainerRef, static: true}) widgetContentContainer: ViewContainerRef;
-
+  test:any;
   widget: Widget;
   widgetInfo: WidgetInfo;
   errorMessages: string[];
@@ -128,19 +128,17 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
   widgetErrorData: ExceptionData;
   loadingData: boolean;
   displayNoData = false;
-
   displayLegend: boolean;
   legendConfig: LegendConfig;
   legendData: LegendData;
   isLegendFirst: boolean;
   legendContainerLayoutType: string;
   legendStyle: {[klass: string]: any};
-
+  dashboardTimewindow:any;
   dynamicWidgetComponentRef: ComponentRef<IDynamicWidgetComponent>;
   dynamicWidgetComponent: IDynamicWidgetComponent;
 
   subscriptionContext: WidgetSubscriptionContext;
-
   subscriptionInited = false;
   destroyed = false;
   widgetSizeDetected = false;
@@ -313,17 +311,18 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
     this.subscriptionContext.widgetUtils = this.widgetContext.utils;
     this.subscriptionContext.getServerTimeDiff = this.dashboardService.getServerTimeDiff.bind(this.dashboardService);
 
-    this.widgetComponentService.getWidgetInfo(this.widget.bundleAlias, this.widget.typeAlias, this.widget.isSystemType).subscribe(
-      (widgetInfo) => {
-        this.widgetInfo = widgetInfo;
-        this.loadFromWidgetInfo();
-      },
-      (errorData) => {
-        this.widgetInfo = errorData.widgetInfo;
-        this.errorMessages = errorData.errorMessages;
-        this.loadFromWidgetInfo();
-      }
-    );
+      this.widgetComponentService.getWidgetInfo(this.widget.bundleAlias, this.widget.typeAlias, this.widget.isSystemType).subscribe(
+        (widgetInfo) => {
+          this.widgetInfo = widgetInfo;
+          this.loadFromWidgetInfo();
+        },
+        (errorData) => {
+          this.widgetInfo = errorData.widgetInfo;
+          this.errorMessages = errorData.errorMessages;
+          this.loadFromWidgetInfo();
+        }
+      );
+
     setTimeout(() => {
       this.dashboardWidget.updateWidgetParams();
     }, 0);
@@ -332,7 +331,9 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
   ngAfterViewInit(): void {
   }
 
+
   ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes);
     for (const propName of Object.keys(changes)) {
       const change = changes[propName];
       if (!change.firstChange && change.currentValue !== change.previousValue) {
@@ -517,6 +518,11 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
         this.widgetContext.defaultSubscription.subscribe();
       }
     }
+    // if(this.dashboardTimewindow){
+    // if(this.widgetContext.inited && this.widgetContext.timeWindow && this.dashboardTimewindow && this.widgetContext.timeWindow.maxTime !== this.dashboardTimewindow.history.fixedTimewindow.endTimeMs || this.widgetContext.timeWindow.minTime !== this.dashboardTimewindow.history.fixedTimewindow.startTimeMs){
+    //   this.widgetContext.timewindowFunctions.onUpdateTimewindow(this.dashboardTimewindow.history.fixedTimewindow.startTimeMs,this.dashboardTimewindow.history.fixedTimewindow.endTimeMs,this.dashboardTimewindow.history.fixedTimewindow.interval)
+    // }
+
   }
 
   private onResize() {
@@ -627,10 +633,10 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
     }
   }
 
+
   private initialize(): Observable<any> {
 
     const initSubject = new ReplaySubject();
-
     this.rxSubscriptions.push(this.widgetContext.aliasController.entityAliasesChanged.subscribe(
       (aliasIds) => {
         let subscriptionChanged = false;
@@ -643,7 +649,8 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
           this.reInit();
         }
       }
-    ));
+    )
+    );
 
     this.rxSubscriptions.push(this.widgetContext.aliasController.filtersChanged.subscribe(
       (filterIds) => {
@@ -659,14 +666,6 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
       }
     ));
 
-    this.rxSubscriptions.push(this.widgetContext.dashboard.dashboardTimewindowChanged.subscribe(
-      (dashboardTimewindow) => {
-        for (const id of Object.keys(this.widgetContext.subscriptions)) {
-          const subscription = this.widgetContext.subscriptions[id];
-          subscription.onDashboardTimewindowChanged(dashboardTimewindow);
-        }
-      }
-    ));
     if (!this.typeParameters.useCustomDatasources) {
       this.createDefaultSubscription().subscribe(
         () => {
@@ -698,6 +697,19 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
       this.dynamicWidgetComponentRef.destroy();
       this.dynamicWidgetComponentRef = null;
     }
+  }
+
+
+  private dashboardTimewindowChanged() {
+    this.rxSubscriptions.push(this.widgetContext.dashboard.dashboardTimewindowChanged.subscribe(
+      (dashboardTimewindow) => {
+        this.dashboardTimewindow = dashboardTimewindow;
+        for (const id of Object.keys(this.widgetContext.subscriptions)) {
+          const subscription = this.widgetContext.subscriptions[id];
+          subscription.onDashboardTimewindowChanged(dashboardTimewindow);
+        }
+      }
+    ));
   }
 
   private handleWidgetException(e) {
@@ -765,13 +777,14 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
       this.widgetResize$.observe(this.widgetContext.$containerParent[0]);
   }
 
-  private createSubscription(options: WidgetSubscriptionOptions, subscribe?: boolean): Observable<IWidgetSubscription> {
+   createSubscription(options: WidgetSubscriptionOptions, subscribe?: boolean): Observable<IWidgetSubscription> {
     const createSubscriptionSubject = new ReplaySubject<IWidgetSubscription>();
     options.dashboardTimewindow = this.widgetContext.dashboardTimewindow;
     const subscription: IWidgetSubscription = new WidgetSubscription(this.subscriptionContext, options);
-    subscription.init$.subscribe(
+     subscription.init$.subscribe(
       () => {
         this.widgetContext.subscriptions[subscription.id] = subscription;
+        this.dashboardTimewindowChanged();
         if (subscribe) {
           subscription.subscribe();
         }
@@ -779,6 +792,7 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
         createSubscriptionSubject.complete();
       },
       (err) => {
+        this.dashboardTimewindowChanged();
         createSubscriptionSubject.error(err);
       }
     );
@@ -1152,8 +1166,7 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
     });
   }
 
-  private elementClick($event: Event) {
-    const e = ($event.target || $event.srcElement) as Element;
+  private findID($event: Event, e: Element){
     if (e.id) {
       const descriptors = this.getActionDescriptors('elementClick');
       if (descriptors.length) {
@@ -1169,6 +1182,16 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
         });
       }
     }
+
+    e = e.parentElement as Element;
+    if(e.nodeName !== 'NG-COMPONENT'){
+      this.findID($event, e)
+    }
+  }
+
+  private elementClick($event: Event) {
+    const e = ($event.target || $event.srcElement) as Element;
+    this.findID($event, e);
   }
 
   private updateEntityParams(params: StateParams, targetEntityParamName?: string, targetEntityId?: EntityId,
