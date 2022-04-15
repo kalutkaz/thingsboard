@@ -259,6 +259,9 @@ export class JsonObjectEditComponent implements OnInit, ControlValueAccessor, Va
       if (this.contentValue && this.contentValue.length > 0) {
         try {
           data = JSON.parse(this.contentValue);
+          if (typeof data !== 'object') {
+            throw new TypeError(`Value is not a valid JSON`)
+          }
           this.objectValid = true;
           this.validationError = '';
         } catch (ex) {
