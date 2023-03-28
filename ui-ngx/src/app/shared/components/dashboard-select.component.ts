@@ -15,7 +15,8 @@
 ///
 
 import {
-  Component, ElementRef,
+  Component,
+  ElementRef,
   forwardRef,
   Inject,
   Injector,
