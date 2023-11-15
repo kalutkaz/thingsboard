@@ -182,6 +182,7 @@ import {
   ExportWidgetsBundleDialogComponent
 } from '@home/components/import-export/export-widgets-bundle-dialog.component';
 import { ScrollGridComponent } from '@home/components/grid/scroll-grid.component';
+import { WidgetSettingsCommonModule } from '@home/components/widget/lib/settings/common/widget-settings-common.module';
 
 @NgModule({
   declarations:
@@ -339,9 +340,12 @@ import { ScrollGridComponent } from '@home/components/grid/scroll-grid.component
     SnmpDeviceProfileTransportModule,
     StatesControllerModule,
     DeviceCredentialsModule,
-    DeviceProfileCommonModule
+    DeviceProfileCommonModule,
+    WidgetSettingsCommonModule
   ],
   exports: [
+    WidgetSettingsCommonModule,
+    WidgetConfigComponentsModule,
     RouterTabsComponent,
     EntitiesTableComponent,
     AddEntityDialogComponent,

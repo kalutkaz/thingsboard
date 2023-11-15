@@ -188,7 +188,13 @@ import * as MaterialIconsComponent from '@shared/components/material-icons.compo
 import * as TbIconComponent from '@shared/components/icon.component';
 import * as HintTooltipIconComponent from '@shared/components/hint-tooltip-icon.component';
 
+import * as CssUnitSelectComponent from '@home/components/widget/lib/settings/common/css-unit-select.component';
+import * as WidgetActionsPanelComponent from '@home/components/widget/config/basic/common/widget-actions-panel.component';
+import * as FontSettingsComponent from '@home/components/widget/lib/settings/common/font-settings.component';
+import * as ColorSettingsComponent from '@home/components/widget/lib/settings/common/color-settings.component';
 import * as AddEntityDialogComponent from '@home/components/entity/add-entity-dialog.component';
+import * as DatasourceComponent from '@home/components/widget/config/datasources.component';
+import * as DataKeysPanelComponent from '@home/components/widget/config/basic/common/data-keys-panel.component';
 import * as EntitiesTableComponent from '@home/components/entity/entities-table.component';
 import * as DetailsPanelComponent from '@home/components/details-panel.component';
 import * as EntityDetailsPanelComponent from '@home/components/entity/entity-details-panel.component';
@@ -496,6 +502,8 @@ class ModulesMap implements IModulesMap {
     '@shared/components/hint-tooltip-icon.component': HintTooltipIconComponent,
 
     '@home/components/entity/add-entity-dialog.component': AddEntityDialogComponent,
+    '@home/components/widget/config/datasources.component': DatasourceComponent,
+    '@home/components/widget/config/basic/common/data-keys-panel.component': DataKeysPanelComponent,
     '@home/components/entity/entities-table.component': EntitiesTableComponent,
     '@home/components/details-panel.component': DetailsPanelComponent,
     '@home/components/entity/entity-details-panel.component': EntityDetailsPanelComponent,
@@ -617,7 +625,11 @@ class ModulesMap implements IModulesMap {
     '@home/components/dashboard-page/dashboard-image-dialog.component': DashboardImageDialogComponent,
     '@home/components/widget/widget-container.component': WidgetContainerComponent,
     '@home/components/profile/queue/tenant-profile-queues.component': TenantProfileQueuesComponent,
-    '@home/components/queue/queue-form.component': QueueFormComponent
+    '@home/components/queue/queue-form.component': QueueFormComponent,
+    '@home/components/widget/lib/settings/common/color-settings.component': ColorSettingsComponent,
+    '@home/components/widget/lib/settings/common/font-settings.component': FontSettingsComponent,
+    '@home/components/widget/config/basic/common/widget-actions-panel.component': WidgetActionsPanelComponent,
+    '@home/components/widget/lib/settings/common/css-unit-select.component': CssUnitSelectComponent
   };
 
   init() {

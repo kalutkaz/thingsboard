@@ -92,12 +92,12 @@ import {
 } from '@home/components/widget/lib/display-columns-panel.component';
 import {
   dataKeyToEntityKey,
-  Direction,
   EntityDataPageLink,
   entityDataPageLinkSortDirection,
   EntityKeyType,
   KeyFilter
 } from '@shared/models/query/query.models';
+import { Direction } from '@shared/models/page/sort-order';
 import { sortItems } from '@shared/models/page/page-link';
 import { entityFields } from '@shared/models/entity.models';
 import { DatePipe } from '@angular/common';
