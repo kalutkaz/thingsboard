@@ -319,6 +319,11 @@ import * as AssetProfileAutocompleteComponent from '@home/components/profile/ass
 import * as RuleChainSelectComponent from '@shared/components/rule-chain/rule-chain-select.component';
 
 import { IModulesMap } from '@modules/common/modules-map.models';
+import { DisplayColumnsPanelComponent } from '@home/components/widget/lib/display-columns-panel.component';
+import { AlarmDetailsDialogComponent } from '@home/components/alarm/alarm-details-dialog.component';
+import { AlarmAssigneePanelComponent } from '@home/components/alarm/alarm-assignee-panel.component';
+import { AlarmCommentDialogComponent } from '@home/components/alarm/alarm-comment-dialog.component';
+import { AlarmFilterConfigComponent } from '@home/components/alarm/alarm-filter-config.component';
 
 declare const System;
 
@@ -501,6 +506,11 @@ class ModulesMap implements IModulesMap {
     '@shared/components/icon.component': TbIconComponent,
     '@shared/components/hint-tooltip-icon.component': HintTooltipIconComponent,
 
+    '@home/components/alarm/alarm-filter-config.component': AlarmFilterConfigComponent,
+    '@home/components/alarm/alarm-comment-dialog.component': AlarmCommentDialogComponent,
+    '@home/components/alarm/alarm-assignee-panel.component': AlarmAssigneePanelComponent,
+    '@home/components/alarm/alarm-details-dialog.component': AlarmDetailsDialogComponent,
+    '@home/components/widget/lib/display-columns-panel.component': DisplayColumnsPanelComponent,
     '@home/components/entity/add-entity-dialog.component': AddEntityDialogComponent,
     '@home/components/widget/config/datasources.component': DatasourceComponent,
     '@home/components/widget/config/basic/common/data-keys-panel.component': DataKeysPanelComponent,
