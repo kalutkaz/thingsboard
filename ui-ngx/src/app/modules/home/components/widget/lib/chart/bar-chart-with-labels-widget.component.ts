@@ -28,15 +28,9 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { WidgetContext } from '@home/models/widget-component.models';
-import {
-  backgroundStyle,
-  ComponentStyle,
-  DateFormatProcessor,
-  overlayStyle,
-  textStyle
-} from '@shared/models/widget-settings.models';
+import { backgroundStyle, ComponentStyle, DateFormatProcessor, overlayStyle, textStyle } from '@shared/models/widget-settings.models';
 import { ResizeObserver } from '@juggle/resize-observer';
-import { formatValue } from '@core/utils';
+import { formatValue, isDefinedAndNotNull } from '@core/utils';
 import { DataKey } from '@shared/models/widget.models';
 import { Observable } from 'rxjs';
 import { ImagePipe } from '@shared/pipe/image.pipe';
@@ -188,7 +182,8 @@ export class BarChartWithLabelsWidgetComponent implements OnInit, OnDestroy, Aft
       const end = api.value(3) as number;
       let interval = end - start;
       if (!start || !end || !interval) {
-        interval = IntervalMath.numberValue(this.ctx.timeWindow.interval);
+        interval =  IntervalMath.numberValue(isDefinedAndNotNull(this.settings.defaultBarWidth) ?
+          this.settings.defaultBarWidth : this.ctx.timeWindow.interval);
         start = time - interval / 2;
       }
       const enabledDataItems = this.dataItems.filter(d => d.enabled);
@@ -200,8 +195,11 @@ export class BarChartWithLabelsWidgetComponent implements OnInit, OnDestroy, Aft
       const startTime = start + intervalGap + barInterval * index;
       const delta = barInterval;
       const lowerLeft = api.coord([startTime, value >= 0 ? value : 0]);
-      const height = api.size([delta, value])[1];
-      const width = api.size([delta, 10])[0];
+      const size = api.size([delta, value]);
+
+      const height =  size[1];
+
+      const width = size[0];
 
       const coordSys: {x: number; y: number; width: number; height: number} = params.coordSys as any;
 
